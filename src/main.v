@@ -4,7 +4,11 @@ import server
 
 fn main() {
 	mut s := server.new()!
-	for p, ok := s.accept(); ok;{
-		p.message("test from v")
+	for {
+		mut p, ok := s.accept()
+		if !ok {
+			return
+		}
+		p.message("welcome, ${p.name()}")
 	}
 }

@@ -23,6 +23,12 @@ func player_message(pl uintptr, msg *C.char) {
 	p.Message(C.GoString(msg))
 }
 
+//export player_name
+func player_name(pl uintptr) *C.char {
+	p := (*player.Player)(unsafe.Pointer(pl))
+	return C.CString(p.Name())
+}
+
 /*
 	SERVER
 */
@@ -33,6 +39,16 @@ func server_accept(srv uintptr) uintptr {
 	pl := uintptr(0)
 	s.Accept(func(p *player.Player) { pl = uintptr(unsafe.Pointer(p)) })
 	return pl
+}
+
+//export server_players
+func server_players(srv uintptr) []uintptr {
+	s := (*server.Server)(unsafe.Pointer(srv))
+	p := make([]uintptr, 0)
+	for _, pl := range s.Players() {
+		p = append(p, uintptr(unsafe.Pointer(pl)))
+	}
+	return p
 }
 
 //export server_start

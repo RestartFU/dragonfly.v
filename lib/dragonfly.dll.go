@@ -57,7 +57,7 @@ func (h *handler) HandleQuit() {
 func server_accept(srv CServer) (pl CPlayer) {
 	ServerFromPtr(srv).Accept(func(p *player.Player) {
 		p.Handle(&handler{})
-		pl = uintptr(unsafe.Pointer(p))
+		pl = CPlayer(unsafe.Pointer(p))
 	})
 	return
 }
@@ -84,7 +84,7 @@ func server_start() CServer {
 	srv.CloseOnProgramEnd()
 
 	srv.Listen()
-	return uintptr(unsafe.Pointer(srv))
+	return CServer(unsafe.Pointer(srv))
 }
 
 /*

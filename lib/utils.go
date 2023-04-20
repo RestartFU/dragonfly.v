@@ -7,15 +7,15 @@ import (
 	"unsafe"
 )
 
-func ServerFromPtr(srv uintptr) *server.Server {
-	return (*server.Server)(unsafe.Pointer(srv))
+func ServerFromPtr(srv CServer) *server.Server {
+	return (*server.Server)(srv.Ptr())
 }
 
-func PlayerFromPtr(pl uintptr) *player.Player {
-	return (*player.Player)(unsafe.Pointer(pl))
+func PlayerFromPtr(pl CPlayer) *player.Player {
+	return (*player.Player)(pl.Ptr())
 }
 
-func GoArrayToCArray[T any](t []*T) uintptr {
+func GoArrayToCArray[T any](t []*T) CArray {
 	cArray := C.malloc(C.size_t(C.int(len(t))) * C.size_t(unsafe.Sizeof(uintptr(0))))
 
 	a := (*[1<<30 - 1]uintptr)(cArray)
@@ -23,12 +23,18 @@ func GoArrayToCArray[T any](t []*T) uintptr {
 		a[index] = uintptr(unsafe.Pointer(value))
 	}
 
-	return (uintptr)(unsafe.Pointer(cArray))
+	return (CArray)(unsafe.Pointer(cArray))
 }
 
 type (
-	CArray  = uintptr
-	CServer = uintptr
-	CPlayer = uintptr
+	UINTPTR uintptr
+
+	CArray  = UINTPTR
+	CServer = UINTPTR
+	CPlayer = UINTPTR
 	CString = *C.char
 )
+
+func (u UINTPTR) Ptr() unsafe.Pointer {
+	return unsafe.Pointer(u)
+}

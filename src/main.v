@@ -10,5 +10,10 @@ fn main() {
 			return
 		}
 		p.message("welcome, ${p.name()}")
+		mut player_list := []string{}
+		for mut pl in s.players() {
+			player_list << pl.name()
+		}
+		println("players online: ${player_list.join(", ")}")
 	}
 }

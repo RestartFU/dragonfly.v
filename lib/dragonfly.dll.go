@@ -18,15 +18,35 @@ import (
 */
 
 //export player_message
-func player_message(pl uintptr, msg *C.char) {
-	p := (*player.Player)(unsafe.Pointer(pl))
-	p.Message(C.GoString(msg))
+func player_message(p CPlayer, msg CString) {
+	PlayerFromPtr(p).Message(C.GoString(msg))
 }
 
 //export player_name
-func player_name(pl uintptr) *C.char {
-	p := (*player.Player)(unsafe.Pointer(pl))
-	return C.CString(p.Name())
+func player_name(p CPlayer) CString {
+	return C.CString(PlayerFromPtr(p).Name())
+}
+
+/*
+	PLAYER HANDLER
+*/
+
+//export player_handle_quit
+func player_handle_quit(p CPlayer, h func()) {
+	hdl := PlayerFromPtr(p).Handler().(*handler)
+	hdl.handleQuit = h
+}
+
+type handler struct {
+	player.NopHandler
+
+	handleQuit func()
+}
+
+func (h *handler) HandleQuit() {
+	if h.handleQuit != nil {
+		h.handleQuit()
+	}
 }
 
 /*
@@ -34,25 +54,21 @@ func player_name(pl uintptr) *C.char {
 */
 
 //export server_accept
-func server_accept(srv uintptr) uintptr {
-	s := (*server.Server)(unsafe.Pointer(srv))
-	pl := uintptr(0)
-	s.Accept(func(p *player.Player) { pl = uintptr(unsafe.Pointer(p)) })
-	return pl
+func server_accept(srv CServer) (pl CPlayer) {
+	ServerFromPtr(srv).Accept(func(p *player.Player) {
+		p.Handle(&handler{})
+		pl = uintptr(unsafe.Pointer(p))
+	})
+	return
 }
 
 //export server_players
-func server_players(srv uintptr) []uintptr {
-	s := (*server.Server)(unsafe.Pointer(srv))
-	p := make([]uintptr, 0)
-	for _, pl := range s.Players() {
-		p = append(p, uintptr(unsafe.Pointer(pl)))
-	}
-	return p
+func server_players(srv CServer) CArray {
+	return GoArrayToCArray(ServerFromPtr(srv).Players())
 }
 
 //export server_start
-func server_start() uintptr {
+func server_start() CServer {
 	log := logrus.New()
 	log.Formatter = &logrus.TextFormatter{ForceColors: true}
 	log.Level = logrus.DebugLevel

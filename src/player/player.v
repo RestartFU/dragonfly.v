@@ -4,12 +4,14 @@ import dl.loader
 
 type T_player_message = fn(voidptr, &u8)
 type T_player_name = fn(voidptr) &u8
+type T_player_handle_quit = fn(voidptr, fn())
 
 pub struct Player {
 	handle voidptr
 
 	player_message T_player_message
 	player_name T_player_name
+	player_handle_quit T_player_handle_quit
 }
 
 pub fn new(h voidptr) !&Player {
@@ -26,7 +28,11 @@ pub fn new(h voidptr) !&Player {
 		handle: h
 		player_message: T_player_message(lib.get_sym("player_message")!)
 		player_name: T_player_name(lib.get_sym("player_name")!)
+		player_handle_quit: T_player_handle_quit(lib.get_sym("player_handle_quit")!) // TODO: fix: unexpected fault address 0xffffffffffffffff
 	}
+	//p.player_handle_quit(p.handle, fn () {
+	//	println("test") //
+	//})
 	return p
 }
 

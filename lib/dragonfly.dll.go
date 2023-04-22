@@ -1,6 +1,12 @@
 package main
 
 import (
+	/*
+			 static void invoke_handle_quit(void (*f)()) {
+			    f();
+			}
+		typedef void (*handle_quit)();
+	*/
 	"C"
 	"fmt"
 	"github.com/df-mc/dragonfly/server/player"
@@ -32,9 +38,11 @@ func player_name(p CPlayer) CString {
 */
 
 //export player_handle_quit
-func player_handle_quit(p CPlayer, h func()) {
+func player_handle_quit(p CPlayer, h UINTPTR) {
 	hdl := PlayerFromPtr(p).Handler().(*handler)
-	hdl.handleQuit = h
+	hdl.handleQuit = func() {
+		C.invoke_handle_quit(C.handle_quit(h.Ptr()))
+	}
 }
 
 type handler struct {

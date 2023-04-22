@@ -33,7 +33,7 @@ pub fn new(h voidptr) !&Player {
 		h: h
 		player_message: T_player_message(lib.get_sym('player_message')!)
 		player_name: T_player_name(lib.get_sym('player_name')!)
-		player_handle_quit: T_player_handle_quit(lib.get_sym('player_handle_quit')!) // TODO: fix: unexpected fault address 0xffffffffffffffff
+		player_handle_quit: T_player_handle_quit(lib.get_sym('player_handle_quit')!)
 		handler: NopHandler{}
 	}
 	return p
